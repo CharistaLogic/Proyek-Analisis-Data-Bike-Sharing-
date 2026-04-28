@@ -141,10 +141,10 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs([
 ])
 
 # =====================================================
-# TAB 1 — PERBANDINGAN TAHUN
+# PERBANDINGAN TAHUN 2011 vs 2012
 # =====================================================
 with tab1:
-    st.subheader("📊 Perbandingan Tren Penyewaan 2011 vs 2012")
+    st.subheader("Perbandingan Tren Penyewaan 2011 vs 2012")
 
     yearly_trend = (
         df_main.groupby(["mnth_name", "yr_name"])["cnt"]
@@ -168,10 +168,10 @@ with tab1:
     st.pyplot(fig)
 
 # =====================================================
-# TAB 2 — TREN BULANAN
+# TREN BULANAN
 # =====================================================
 with tab2:
-    st.subheader(f"📈 Tren Bulanan Tahun {selected_year}")
+    st.subheader(f"Tren Bulanan Tahun {selected_year}")
 
     if not filtered_df.empty:
         actual_order = [
@@ -216,10 +216,10 @@ with tab2:
             st.pyplot(fig)
 
 # =====================================================
-# TAB 3 — CASUAL VS REGISTERED
+# CASUAL VS REGISTERED
 # =====================================================
 with tab3:
-    st.subheader("👥 Perbandingan Casual vs Registered")
+    st.subheader("Perbandingan Casual vs Registered")
 
     if not filtered_df.empty:
         actual_order = [
@@ -256,10 +256,10 @@ with tab3:
         st.pyplot(fig)
 
 # =====================================================
-# TAB 4 — KECEPATAN ANGIN
+# KECEPATAN ANGIN
 # =====================================================
 with tab4:
-    st.subheader("🌬️ Dampak Kecepatan Angin")
+    st.subheader("Dampak Kecepatan Angin")
 
     if not filtered_df.empty:
         avg_wind = df_main["windspeed"].mean()
@@ -290,10 +290,10 @@ with tab4:
         st.pyplot(fig)
 
 # =====================================================
-# TAB 5 — ANALISIS SUHU + KORELASI
+# ANALISIS SUHU + KORELASI
 # =====================================================
 with tab5:
-    st.subheader("🔥 Analisis Suhu & Korelasi")
+    st.subheader("Analisis Suhu & Korelasi")
 
     if not filtered_df.empty:
         actual_order = [
