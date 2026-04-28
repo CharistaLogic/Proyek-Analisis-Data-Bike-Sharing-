@@ -1,5 +1,4 @@
-# Proyek-Analisis-Data-Bike-Sharing
-# Bike Sharing Analysis Dashboard
+# Proyek Bike Sharing Analysis Dashboard
 
 ## Project Overview
 Proyek ini bertujuan untuk menganalisis data penyewaan sepeda (Bike Sharing Dataset) guna memahami pola penggunaan berdasarkan waktu, kondisi cuaca, dan tipe pengguna.
