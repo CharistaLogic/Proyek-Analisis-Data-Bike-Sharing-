@@ -419,6 +419,6 @@ if not filtered_df.empty:
         """)
 
 else:
-    st.warning("⚠️ Tidak ada data untuk filter yang dipilih.")
+    st.warning("⚠️ Tidak ada data! pilih filter bulan.")
 
 st.caption("Copyright © Charista Septi Dwi Artamy - 2026")
