@@ -39,7 +39,4 @@ Dataset berisi informasi harian penyewaan sepeda seperti:
 - Pengguna registered lebih stabil dibanding casual
 
 ## Run Steamlit App
-Jalankan dashboard menggunakan perintah berikut:
-
-```bash id=" " 
 streamlit run main.py
