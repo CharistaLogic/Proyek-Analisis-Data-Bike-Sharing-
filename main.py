@@ -19,13 +19,13 @@ def load_data():
 
 df_all = load_data()
 
-# --- SIDEBAR (FILTER INTERAKTIF) ---
-st.sidebar.title("🚲 Filter Analysis")
+# --- SIDEBAR (FITUR INTERAKTIF: FILTERING) ---
+st.sidebar.title("🚲 Opsi Filter")
 selected_year = st.sidebar.selectbox("Pilih Tahun:", options=['2011', '2012'], index=1)
 month_options = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 selected_months = st.sidebar.multiselect("Pilih Bulan:", options=month_options, default=month_options)
 
-# Filter Data
+# Eksekusi Filter Utama
 filtered_df = df_all[(df_all['year_label'] == selected_year) & (df_all['mnth_name'].isin(selected_months))]
 
 # --- HALAMAN UTAMA ---
@@ -59,24 +59,32 @@ with tab1:
         ax.legend()
         st.pyplot(fig)
     else:
-        st.warning("Silakan pilih minimal satu bulan di sidebar.")
+        st.warning("Silakan pilih bulan di sidebar.")
 
 with tab2:
-    st.subheader("Penyewaan Berdasarkan Kecepatan Angin")
+    st.subheader("Analisis Interaktif: Dampak Kecepatan Angin")
     if not filtered_df.empty:
-        avg_wind_ref = filtered_df['windspeed'].mean()
-        filtered_df['wind_status'] = filtered_df['windspeed'].apply(lambda x: 'Angin Tinggi' if x > avg_wind_ref else 'Angin Rendah')
-        wind_impact = filtered_df.groupby('wind_status')['cnt'].mean()
+        avg_wind_val = float(df_all['windspeed'].mean())
+        wind_threshold = st.slider("Tentukan Ambang Batas Kecepatan Angin:", 
+                                   min_value=float(df_all['windspeed'].min()), 
+                                   max_value=float(df_all['windspeed'].max()), 
+                                   value=avg_wind_val, step=0.01)
+
+        filtered_df['wind_status'] = filtered_df['windspeed'].apply(
+            lambda x: 'Di Atas Ambang' if x > wind_threshold else 'Di Bawah Ambang'
+        )
+        wind_impact = filtered_df.groupby('wind_status')['cnt'].mean().reindex(['Di Atas Ambang', 'Di Bawah Ambang'])
+        
         fig, ax = plt.subplots(figsize=(8, 5))
         sns.barplot(x=wind_impact.index, y=wind_impact.values, palette='viridis', ax=ax)
         ax.set_ylabel("Rata-rata Penyewaan")
         st.pyplot(fig)
+        st.write(f"Grafik menunjukkan perbandingan penyewaan berdasarkan ambang batas angin: **{wind_threshold:.2f}**")
 
 # --- CONCLUSION & RECOMMENDATION ---
 st.divider()
 st.subheader("Conclusion & Recommendation")
 
-# Fitur Interaktif: Expander (User harus klik untuk membaca)
 with st.expander("Buka untuk melihat Detail Analisis & Rekomendasi"):
     st.write(f"### Analisis Tahun {selected_year} untuk {len(selected_months)} Bulan Terpilih:")
     
@@ -84,29 +92,20 @@ with st.expander("Buka untuk melihat Detail Analisis & Rekomendasi"):
     
     with col_c:
         st.success("**Conclusion**")
-        # Angka dan teks berubah otomatis mengikuti filter
         if not filtered_df.empty:
-            # Mencari bulan dengan rata-rata tertinggi dari data yang difilter
             max_month = filtered_df.groupby('mnth_name')['cnt'].mean().idxmax()
             avg_cnt = filtered_df['cnt'].mean()
             st.write(f"""
             1. **Tren:** Pada periode {selected_year}, puncak permintaan terjadi di bulan **{max_month}** dengan rata-rata **{avg_cnt:.0f}** penyewaan per hari.
-            2. **Kecepatan Angin:** Analisis menunjukkan bahwa kondisi angin rendah secara konsisten mendongkrak jumlah penyewaan.
-            3. **Tipe Pengguna:** Pengguna Registered tetap menjadi penyumbang volume penyewaan yang paling stabil dibandingkan Casual.
+            2. **Kecepatan Angin:** Analisis menunjukkan kondisi angin rendah secara konsisten mendongkrak jumlah penyewaan.
+            3. **Tipe Pengguna:** Pengguna Registered tetap menjadi penyumbang volume paling stabil dibandingkan Casual.
             """)
-        else:
-            st.write("Silakan pilih data pada sidebar untuk melihat kesimpulan.")
 
     with col_r:
         st.info("**Interactive Recommendation**")
         if not filtered_df.empty:
-            # Fitur Interaktif Tambahan -> Radio button di dalam expander
-            rec_type = st.radio(
-                "Pilih Fokus Rekomendasi:",
-                ["Operasional", "Marketing & Strategi"],
-                horizontal=True
-            )
-    
+            rec_type = st.radio("Pilih Fokus Rekomendasi:", ["Operasional", "Marketing"], horizontal=True)
+            
             if rec_type == "Operasional":
                 st.write(f"""
                 - Segera lakukan penambahan stok dan pengecekan armada pada bulan **{max_month}** karena merupakan puncak permintaan.
@@ -114,9 +113,8 @@ with st.expander("Buka untuk melihat Detail Analisis & Rekomendasi"):
                 """)
             else:
                 st.write(f"""
-                - Memberikan promo khusus pada pengguna Casual untuk meningkatkan konversi menjadi Registered.
-                - Mengembangkan program loyalitas bagi pengguna Registered agar frekuensi penyewaan tetap stabil di tahun {selected_year}.
+                - **Marketing :** Berikan promo pada pengguna Casual untuk meningkatkan konversi ke Registered.
+                - **Retensi:** Perkuat program loyalitas bagi pengguna Registered di tahun {selected_year}.
                 """)
-        else:
-            st.write("Silakan pilih data pada sidebar untuk melihat rekomendasi.")
+
 st.caption("Copyright © Charista Septi Dwi Artamy - 2026")
