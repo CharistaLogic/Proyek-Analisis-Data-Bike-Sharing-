@@ -6,64 +6,51 @@ import seaborn as sns
 # 1. Konfigurasi Halaman
 st.set_page_config(page_title="Bike Sharing Dashboard", layout="wide")
 
-# 2. Fungsi Memuat Data (Sesuai alur analisis Notebook Anda)
+# 2. Fungsi Memuat Data
 @st.cache_data
 def load_data():
     df = pd.read_csv("day.csv")
     df['dteday'] = pd.to_datetime(df['dteday'])
-    
-    # Mapping Nama Bulan & Tahun agar dashboard lebih mudah digunakan
     df['year_label'] = df['yr'].map({0: '2011', 1: '2012'})
     month_map = {1: 'Jan', 2: 'Feb', 3: 'Mar', 4: 'Apr', 5: 'May', 6: 'Jun',
                  7: 'Jul', 8: 'Aug', 9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Dec'}
     df['mnth_name'] = df['mnth'].map(month_map)
-    
     return df
 
 df_all = load_data()
 
-# --- SIDEBAR (FITUR INTERAKTIF: FILTERING) ---
+# --- SIDEBAR (FILTER INTERAKTIF) ---
 st.sidebar.title("🚲 Opsi Filter")
-st.sidebar.markdown("Manipulasi data di bawah ini untuk melihat perubahan pada grafik dan kesimpulan secara real-time.")
-
-# Filter Tahun
 selected_year = st.sidebar.selectbox("Pilih Tahun:", options=['2011', '2012'], index=1)
-
-# Filter Bulan (Fitur interaktif utama untuk eksplorasi)
 month_options = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-selected_months = st.sidebar.multiselect(
-    "Pilih Bulan:",
-    options=month_options,
-    default=month_options
-)
+selected_months = st.sidebar.multiselect("Pilih Bulan:", options=month_options, default=month_options)
 
-# Eksekusi Filter
+# Filter Data
 filtered_df = df_all[(df_all['year_label'] == selected_year) & (df_all['mnth_name'].isin(selected_months))]
 
 # --- HALAMAN UTAMA ---
 st.title("Bike Sharing Analysis Dashboard")
 st.markdown(f"**Nama:** Charista Septi Dwi Artamy | **ID Dicoding:** CDCC183D6X2720")
 
-# Metrik Utama (Dinamis merespons filter)
+# Metrik Dinamis
 col1, col2, col3 = st.columns(3)
 with col1:
     st.metric(f"Total Penyewaan ({selected_year})", f"{filtered_df['cnt'].sum():,}")
 with col2:
-    st.metric("Rata-rata Registered", f"{filtered_df['registered'].mean():.0f}" if not filtered_df.empty else 0)
+    st.metric("Rata-rata User Registered", f"{filtered_df['registered'].mean():.0f}" if not filtered_df.empty else 0)
 with col3:
-    st.metric("Rata-rata Casual", f"{filtered_df['casual'].mean():.0f}" if not filtered_df.empty else 0)
+    st.metric("Rata-rata User Casual", f"{filtered_df['casual'].mean():.0f}" if not filtered_df.empty else 0)
 
 st.divider()
 
-# --- VISUALISASI DATA (2 Pertanyaan Bisnis Utama) ---
-tab1, tab2 = st.tabs(["Tren & Tipe Pengguna", "Pengaruh Kecepatan Angin"])
+# --- VISUALISASI DATA ---
+tab1, tab2 = st.tabs(["📊 Tren & Tipe Pengguna", "🌬️ Dampak Kecepatan Angin"])
 
 with tab1:
     st.subheader(f"Tren Rata-rata Penyewaan per Bulan ({selected_year})")
     if not filtered_df.empty:
         actual_order = [m for m in month_options if m in selected_months]
         trend_data = filtered_df.groupby('mnth_name')[['casual', 'registered', 'cnt']].mean().reindex(actual_order)
-        
         fig, ax = plt.subplots(figsize=(10, 5))
         ax.plot(trend_data.index, trend_data['cnt'], marker='o', linewidth=2, label='Total', color='#2E7D32')
         ax.bar(trend_data.index, trend_data['registered'], alpha=0.3, label='Registered', color='#1976D2')
@@ -77,45 +64,25 @@ with tab1:
 with tab2:
     st.subheader("Penyewaan Berdasarkan Kecepatan Angin")
     if not filtered_df.empty:
-        # Menghitung status angin berdasarkan rata-rata tahun terpilih
-        ref_wind = filtered_df['windspeed'].mean()
-        filtered_df['wind_status'] = filtered_df['windspeed'].apply(lambda x: 'Angin Tinggi' if x > ref_wind else 'Angin Rendah')
+        avg_wind_ref = filtered_df['windspeed'].mean()
+        filtered_df['wind_status'] = filtered_df['windspeed'].apply(lambda x: 'Angin Tinggi' if x > avg_wind_ref else 'Angin Rendah')
         wind_impact = filtered_df.groupby('wind_status')['cnt'].mean()
-        
         fig, ax = plt.subplots(figsize=(8, 5))
         sns.barplot(x=wind_impact.index, y=wind_impact.values, palette='viridis', ax=ax)
         ax.set_ylabel("Rata-rata Penyewaan")
         st.pyplot(fig)
 
-# --- BAGIAN INTERAKTIF: CONCLUSION & RECOMMENDATION ---
+# --- BAGIAN KESIMPULAN & REKOMENDASI (SANGAT INTERAKTIF) ---
 st.divider()
-st.subheader("Conclusion & Recommendation")
+st.subheader("Conclusion & Interactive Recommendation")
 
-# Fitur Interaktif: Expander (User harus klik untuk membaca)
-with st.expander("Buka untuk melihat Detail Analisis & Rekomendasi"):
-    st.write(f"### Analisis Tahun {selected_year} untuk {len(selected_months)} Bulan Terpilih:")
+# 1. Kesimpulan Dinamis (Otomatis berubah mengikuti filter)
+if not filtered_df.empty:
+    max_month = filtered_df.groupby('mnth_name')['cnt'].mean().idxmax()
+    avg_rent = filtered_df['cnt'].mean()
     
-    col_c, col_r = st.columns(2)
-    with col_c:
-        st.success("**Conclusion**")
-        # Logika Dinamis: Angka dan teks berubah otomatis mengikuti filter
-        if not filtered_df.empty:
-            max_month = filtered_df.groupby('mnth_name')['cnt'].mean().idxmax()
-            avg_cnt = filtered_df['cnt'].mean()
-            st.write(f"""
-            1. **Tren:** Pada periode terpilih, puncak permintaan terjadi di bulan **{max_month}** dengan rata-rata **{avg_cnt:.0f}** penyewaan per hari.
-            2. **Kecepatan Angin:** Analisis menunjukkan bahwa kondisi angin rendah secara konsisten mendongkrak jumlah penyewaan.
-            3. **Tipe Pengguna:** Pengguna Registered tetap menjadi penyumbang volume penyewaan yang paling stabil dibandingkan Casual.
-            """)
-        else:
-            st.write("Silakan pilih data pada sidebar untuk melihat kesimpulan.")
+    st.success(f"**Conclusion:** Berdasarkan data tahun {selected_year}, puncak penyewaan terjadi pada bulan **{max_month}** dengan rata-rata harian **{avg_rent:.0f}** sepeda. Kondisi angin rendah terbukti meningkatkan minat pengguna secara signifikan.")
 
-    with col_r:
-        st.info("**Recommendation Action**")
-        st.write("""
-        - **Optimalisasi:** Menambah jumlah unit sepeda pada bulan dengan permintaan tertinggi (Mei-September).
-        - **Operasional:** Mengatur distribusi armada berdasarkan prediksi cuaca dan kondisi angin.
-        - **Strategi Marketing:** Mengembangkan promo khusus untuk pengguna Casual guna meningkatkan konversi menjadi Registered.
-        """)
-
-st.caption("Copyright © Charista Septi Dwi Artamy - 2026")
+# 2. Rekomendasi Interaktif (User bisa memilih aksi)
+st.markdown("### 💡 Interactive Strategy Recommendation")
+st.write("Pilih fokus
