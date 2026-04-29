@@ -4,7 +4,6 @@
 Proyek ini bertujuan untuk menganalisis data penyewaan sepeda (Bike Sharing Dataset) guna memahami pola penggunaan berdasarkan waktu, kondisi cuaca, dan tipe pengguna.
 
 Dashboard dibuat menggunakan Streamlit untuk menampilkan hasil analisis secara interaktif.
-
 ## Business Questions
 1. Bagaimana perbedaan tren rata-rata jumlah penyewaan sepeda (cnt) per bulan antara tahun 2011 dan 2012, serta apa implikasinya terhadap pertumbuhan penggunaan layanan bike sharing?
 2. Bagaimana tren rata-rata dan total jumlah penyewaan sepeda (cnt) pada setiap bulan selama tahun 2012, serta bulan mana yang menunjukkan perubahan paling signifikan?
@@ -21,7 +20,6 @@ Dashboard dibuat menggunakan Streamlit untuk menampilkan hasil analisis secara i
 
 ## Dataset
 Dataset yang digunakan adalah: day.csv
-
 Dataset berisi informasi harian penyewaan sepeda seperti:
 - tanggal
 - musim
@@ -38,16 +36,16 @@ Dataset berisi informasi harian penyewaan sepeda seperti:
 - Angin rendah meningkatkan jumlah penyewaan
 - Pengguna registered lebih stabil dibanding casual
 
-
-##Setup Evironment
+## Setup Evironment
 Pastikan Python sudah terinstall di perangkat Anda.
 Bisa menggunakan : 
 - Python 3.10 atau 3.11
 Cek versi Python:
 python --version
 
-#Instalasi Dependencies
+## Instalasi Dependencies
 Install semua library yang dibutuhkan:
+
 pip install pandas matplotlib seaborn streamlit
 
 ##Struktur Folder Proyek
@@ -63,7 +61,7 @@ project/
 │
 └── README.md
 
-##Cara Deploy
+## Cara Deploy
 Dashboard dapat di-deploy menggunakan Streamlit Cloud:
 1. Upload project ke GitHub
 2. Buka https://streamlit.io/cloud
@@ -74,11 +72,11 @@ Dashboard dapat di-deploy menggunakan Streamlit Cloud:
 Setelah semua dependency terinstall, jalankan dashboard dengan perintah: 
  streamlit run main.py
 
-##Akses Dashboard
+## Akses Dashboard
 Setelah dijalankan, dashboard akan otomatis terbuka di browser:
 http://localhost:8501
 
-##Cara Deploy
+## Cara Deploy
 Dashboard dapat di-deploy menggunakan Streamlit Cloud:
 1. Upload project ke GitHub
 2. Buka https://streamlit.io/cloud
