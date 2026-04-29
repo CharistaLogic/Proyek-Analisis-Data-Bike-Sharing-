@@ -41,7 +41,7 @@ Pastikan Python sudah terinstall di perangkat Anda.
 Bisa menggunakan : 
 - Python 3.10 atau 3.11
 Cek versi Python:
-python --version
+- python --version
 
 ## Instalasi Dependencies
 Install semua library yang dibutuhkan:
