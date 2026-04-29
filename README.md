@@ -72,8 +72,11 @@ Dashboard dapat di-deploy menggunakan Streamlit Cloud:
 
 ## Menjalankan Dashboard Streamlit
 Setelah semua dependency terinstall, jalankan dashboard dengan perintah: 
-```bash id=" " 
-streamlit run main.py
+ streamlit run main.py
+
+##Akses Dashboard
+Setelah dijalankan, dashboard akan otomatis terbuka di browser:
+http://localhost:8501
 
 '##Cara Deploy'
 Dashboard dapat di-deploy menggunakan Streamlit Cloud:
