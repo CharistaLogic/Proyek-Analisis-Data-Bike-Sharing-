@@ -40,6 +40,7 @@ Dataset berisi informasi harian penyewaan sepeda seperti:
 Pastikan Python sudah terinstall di perangkat Anda.
 Bisa menggunakan : 
 - Python 3.10 atau 3.11
+
 Cek versi Python:
 - python --version
 
