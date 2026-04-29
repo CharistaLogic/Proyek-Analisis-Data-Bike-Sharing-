@@ -2,105 +2,99 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 
-st.set_page_config(layout="wide")
+# ======================
+# CONFIG
+# ======================
+st.set_page_config(page_title="Bike Sharing Dashboard", layout="wide")
 
 # ======================
 # LOAD DATA
 # ======================
 @st.cache_data
 def load_data():
-    df = pd.read_csv("data/day.csv")
+    df = pd.read_csv("day.csv")
     df["dteday"] = pd.to_datetime(df["dteday"])
-    df["yr"] = df["yr"].map({0:"2011",1:"2012"})
-    
+
+    # Mapping tahun
+    df["yr"] = df["yr"].map({0: "2011", 1: "2012"})
+
+    # Kategori wind (sesuai notebook)
     avg_wind = df["windspeed"].mean()
     df["wind_category"] = df["windspeed"].apply(
         lambda x: "High Wind" if x > avg_wind else "Low Wind"
     )
+
     return df
 
 df = load_data()
 
 # ======================
-# SIDEBAR FILTER
+# FILTER (INTERAKTIF)
 # ======================
 st.sidebar.header("🔎 Filter")
 
-year = st.sidebar.selectbox("Tahun", df["yr"].unique())
-
-month = st.sidebar.slider(
-    "Pilih Rentang Bulan",
-    min_value=1,
-    max_value=12,
-    value=(1,12)
+selected_month = st.sidebar.multiselect(
+    "Pilih Bulan",
+    sorted(df["mnth"].unique()),
+    default=sorted(df["mnth"].unique())
 )
 
-filtered = df[
-    (df["yr"] == year) &
-    (df["mnth"] >= month[0]) &
-    (df["mnth"] <= month[1])
-]
+# Fokus analisis ke 2012 (sesuai notebook)
+df_2012 = df[df["yr"] == "2012"]
+
+filtered_df = df_2012[df_2012["mnth"].isin(selected_month)]
 
 # ======================
 # TITLE
 # ======================
 st.title("🚲 Bike Sharing Dashboard")
-st.caption("Analisis penyewaan sepeda berdasarkan waktu & cuaca")
+st.markdown("Analisis penyewaan sepeda berdasarkan waktu dan kondisi angin (tahun 2012)")
 
 # ======================
-# KPI DINAMIS
+# 📊 VISUAL 1
+# Tren penyewaan (Pertanyaan Bisnis 1)
 # ======================
-col1, col2, col3 = st.columns(3)
+st.subheader("📊 Tren Penyewaan Sepeda per Bulan (2012)")
 
-col1.metric("Total Penyewaan", int(filtered["cnt"].sum()))
-col2.metric("Rata-rata", int(filtered["cnt"].mean()))
-col3.metric("Hari Tertinggi", int(filtered["cnt"].max()))
+monthly = filtered_df.groupby("mnth")["cnt"].mean()
 
-# ======================
-# TOGGLE VISUAL
-# ======================
-chart_option = st.radio(
-    "Pilih Analisis",
-    ["Tren Penyewaan", "Pengaruh Angin"]
-)
+fig1, ax1 = plt.subplots()
+ax1.plot(monthly.index, monthly.values, marker='o')
+ax1.set_xlabel("Bulan")
+ax1.set_ylabel("Rata-rata Penyewaan")
+ax1.set_title("Tren Penyewaan Sepeda")
+ax1.grid()
 
-# ======================
-# VISUAL 1
-# ======================
-if chart_option == "Tren Penyewaan":
-    st.subheader("📊 Tren Penyewaan Sepeda")
+st.pyplot(fig1)
 
-    monthly = filtered.groupby("mnth")["cnt"].mean()
-
-    fig, ax = plt.subplots()
-    ax.plot(monthly.index, monthly.values, marker='o')
-    ax.set_title("Rata-rata Penyewaan per Bulan")
-    ax.set_xlabel("Bulan")
-    ax.set_ylabel("Jumlah Penyewaan")
-    ax.grid()
-
-    st.pyplot(fig)
-
-    st.success("Insight: Penyewaan meningkat di pertengahan tahun → ada pola musiman")
+st.markdown("""
+**Insight:**  
+Terjadi peningkatan penyewaan pada pertengahan tahun, menunjukkan adanya pola musiman (seasonality).
+""")
 
 # ======================
-# VISUAL 2
+# 📊 VISUAL 2
+# Pengaruh angin (Pertanyaan Bisnis 2)
 # ======================
-else:
-    st.subheader("🌬️ Pengaruh Kecepatan Angin")
+st.subheader("🌬️ Pengaruh Kecepatan Angin terhadap Penyewaan")
 
-    wind = filtered.groupby("wind_category")["cnt"].mean()
+wind = filtered_df.groupby("wind_category")["cnt"].mean()
 
-    fig, ax = plt.subplots()
-    ax.bar(wind.index, wind.values)
-    ax.set_title("Rata-rata Penyewaan Berdasarkan Angin")
+fig2, ax2 = plt.subplots()
+ax2.bar(wind.index, wind.values)
+ax2.set_xlabel("Kategori Angin")
+ax2.set_ylabel("Rata-rata Penyewaan")
+ax2.set_title("Pengaruh Kecepatan Angin")
 
-    st.pyplot(fig)
+st.pyplot(fig2)
 
-    st.warning("Insight: Angin rendah → penyewaan lebih tinggi")
+st.markdown("""
+**Insight:**  
+Penyewaan sepeda lebih tinggi pada kondisi angin rendah, menunjukkan faktor kenyamanan memengaruhi penggunaan layanan.
+""")
 
 # ======================
-# DATA VIEW (INTERAKTIF)
+# FOOTER
 # ======================
-with st.expander("📄 Lihat Data"):
-    st.dataframe(filtered)
+st.markdown("---")
+st.caption("Dashboard Analisis Bike Sharing - 2012")
