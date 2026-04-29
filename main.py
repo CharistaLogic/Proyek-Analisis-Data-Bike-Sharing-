@@ -9,6 +9,7 @@ st.set_page_config(page_title="Bike Sharing Dashboard", layout="wide")
 # 2. Fungsi Memuat Data
 @st.cache_data
 def load_data():
+    # Pastikan file day.csv ada di folder yang sama
     df = pd.read_csv("day.csv")
     df['dteday'] = pd.to_datetime(df['dteday'])
     df['year_label'] = df['yr'].map({0: '2011', 1: '2012'})
@@ -20,13 +21,13 @@ def load_data():
 df_all = load_data()
 
 # --- SIDEBAR (FITUR INTERAKTIF: FILTERING) ---
-st.sidebar.title("🚲 Opsi Filter")
+st.sidebar.title("🚲 Filter Analyst")
 selected_year = st.sidebar.selectbox("Pilih Tahun:", options=['2011', '2012'], index=1)
 month_options = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 selected_months = st.sidebar.multiselect("Pilih Bulan:", options=month_options, default=month_options)
 
 # Eksekusi Filter Utama
-filtered_df = df_all[(df_all['year_label'] == selected_year) & (df_all['mnth_name'].isin(selected_months))]
+filtered_df = df_all[(df_all['year_label'] == selected_year) & (df_all['mnth_name'].isin(selected_months))].copy()
 
 # --- HALAMAN UTAMA ---
 st.title("Bike Sharing Analysis Dashboard")
@@ -70,10 +71,11 @@ with tab2:
                                    max_value=float(df_all['windspeed'].max()), 
                                    value=avg_wind_val, step=0.01)
 
+        # Perbaikan label agar konsisten dengan reindex
         filtered_df['wind_status'] = filtered_df['windspeed'].apply(
-            lambda x: 'Di Atas Ambang' if x > wind_threshold else 'Di Bawah Ambang'
+            lambda x: 'High Wind' if x > wind_threshold else 'Low Wind'
         )
-        wind_impact = filtered_df.groupby('wind_status')['cnt'].mean().reindex(['Di Atas Ambang', 'Di Bawah Ambang'])
+        wind_impact = filtered_df.groupby('wind_status')['cnt'].mean().reindex(['High Wind', 'Low Wind'])
         
         fig, ax = plt.subplots(figsize=(8, 5))
         sns.barplot(x=wind_impact.index, y=wind_impact.values, palette='viridis', ax=ax)
@@ -93,6 +95,7 @@ with st.expander("Buka untuk melihat Detail Analisis & Rekomendasi"):
     with col_c:
         st.success("**Conclusion**")
         if not filtered_df.empty:
+            # Mencari bulan dengan rata-rata penyewaan tertinggi
             max_month = filtered_df.groupby('mnth_name')['cnt'].mean().idxmax()
             avg_cnt = filtered_df['cnt'].mean()
             st.write(f"""
@@ -105,16 +108,13 @@ with st.expander("Buka untuk melihat Detail Analisis & Rekomendasi"):
         st.info("**Interactive Recommendation**")
         if not filtered_df.empty:
             rec_type = st.radio("Pilih Fokus Rekomendasi:", ["Operasional", "Marketing"], horizontal=True)
-            
             if rec_type == "Operasional":
                 st.write(f"""
                 - Segera lakukan penambahan stok dan pengecekan armada pada bulan **{max_month}** karena merupakan puncak permintaan.
-                - **Manajemen Cuaca,** Menyesuaikan distribusi sepeda berdasarkan prediksi kecepatan angin harian untuk menjaga kenyamanan pengguna.
-                """)
+                - **Manajemen Cuaca,** Menyesuaikan distribusi sepeda berdasarkan prediksi kecepatan angin harian untuk menjaga kenyamanan pengguna.""")
             else:
                 st.write(f"""
                 - **Marketing :** Berikan promo pada pengguna Casual untuk meningkatkan konversi ke Registered.
-                - **Retensi:** Perkuat program loyalitas bagi pengguna Registered di tahun {selected_year}.
-                """)
+                - **Retensi:** Perkuat program loyalitas bagi pengguna Registered di tahun {selected_year}.""")
 
 st.caption("Copyright © Charista Septi Dwi Artamy - 2026")
