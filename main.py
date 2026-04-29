@@ -105,7 +105,7 @@ with st.expander("Buka untuk melihat Detail Analisis & Rekomendasi"):
             """)
 
     with col_r:
-        st.info("**Interactive Recommendation**")
+        st.info("**Recommendation**")
         if not filtered_df.empty:
             rec_type = st.radio("Pilih Fokus Rekomendasi:", ["Operasional", "Marketing"], horizontal=True)
             if rec_type == "Operasional":
