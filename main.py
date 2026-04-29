@@ -3,61 +3,64 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# 1. Konfigurasi Halaman
+# 1. Konfigurasi Halaman (Wajib ada untuk dashboard profesional)
 st.set_page_config(page_title="Bike Sharing Dashboard", layout="wide")
 
-# 2. Fungsi Memuat Data
+# 2. Fungsi Memuat Data (Diselaraskan dengan notebook Anda)
 @st.cache_data
 def load_data():
     df = pd.read_csv("day.csv")
     df['dteday'] = pd.to_datetime(df['dteday'])
     
-    # Menyiapkan kolom Label Tahun & Nama Bulan
-    df['year_label'] = df['yr'].map({0: '2011', 1: '2012'})
+    # Fokus pada Tahun 2012 (yr=1) sesuai ruang lingkup pertanyaan bisnis Anda
+    df_2012 = df[df['yr'] == 1].copy()
+    
+    # Mapping Nama Bulan agar Filter Sidebar lebih intuitif bagi pengguna
     month_map = {1: 'Jan', 2: 'Feb', 3: 'Mar', 4: 'Apr', 5: 'May', 6: 'Jun',
                  7: 'Jul', 8: 'Aug', 9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Dec'}
-    df['mnth_name'] = df['mnth'].map(month_map)
+    df_2012['mnth_name'] = df_2012['mnth'].map(month_map)
     
-    return df
+    return df_2012
 
-df_all = load_data()
+df_main = load_data()
 
-# --- SIDEBAR (FITUR INTERAKTIF: FILTERING) ---
+# --- SIDEBAR (FITUR INTERAKTIF UTAMA) ---
 st.sidebar.title("🚲 Opsi Filter")
-st.sidebar.markdown("Manipulasi data untuk melihat perubahan tren secara langsung.")
+st.sidebar.markdown("Manipulasi data untuk melihat perubahan tren secara real-time.")
 
-# Filter 1: Tahun (Memenuhi kriteria eksplorasi tahunan)
-selected_year = st.sidebar.selectbox("Pilih Tahun:", options=['2011', '2012'], index=1)
-
-# Filter 2: Bulan (Memenuhi kriteria manipulasi data bulanan)
+# Filter Bulan: Memungkinkan pengguna mengeksplorasi data sesuai kriteria revisi
 month_options = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-selected_months = st.sidebar.multiselect("Pilih Bulan:", options=month_options, default=month_options)
+selected_months = st.sidebar.multiselect(
+    "Pilih Bulan yang Ingin Dianalisis:",
+    options=month_options,
+    default=month_options
+)
 
-# Eksekusi Filter
-filtered_df = df_all[(df_all['year_label'] == selected_year) & (df_all['mnth_name'].isin(selected_months))]
+# Terapkan Filter (Ini adalah manipulasi data langsung)
+filtered_df = df_main[df_main['mnth_name'].isin(selected_months)]
 
 # --- HALAMAN UTAMA ---
-st.title("Bike Sharing Analysis Dashboard")
+st.title("Bike Sharing Analysis Dashboard (2012)")
 st.markdown(f"**Nama:** Charista Septi Dwi Artamy | **ID Dicoding:** CDCC183D6X2720")
 
-# Metrik Utama (Dinamis)
+# Baris Metrik (Dinamis merespons filter)
 col1, col2, col3 = st.columns(3)
 with col1:
-    st.metric(f"Total Penyewaan ({selected_year})", f"{filtered_df['cnt'].sum():,}")
+    st.metric("Total Penyewaan", f"{filtered_df['cnt'].sum():,}")
 with col2:
-    st.metric("Rata-rata User Registered", f"{filtered_df['registered'].mean():.0f}")
+    st.metric("Rata-rata Registered", f"{filtered_df['registered'].mean():.0f}")
 with col3:
-    st.metric("Rata-rata User Casual", f"{filtered_df['casual'].mean():.0f}")
+    st.metric("Rata-rata Casual", f"{filtered_df['casual'].mean():.0f}")
 
 st.divider()
 
-# --- VISUALISASI DATA (2 Pertanyaan Bisnis Utama) ---
-tab1, tab2 = st.tabs(["📊 Tren & Perbandingan User", "🌬️ Dampak Kecepatan Angin"])
+# --- VISUALISASI DATA (2 Visualisasi dari 2 Pertanyaan Bisnis) ---
+tab1, tab2 = st.tabs(["Tren & Tipe Pengguna", "Pengaruh Angin"])
 
 with tab1:
-    st.subheader(f"Tren Rata-rata Penyewaan per Bulan ({selected_year})")
+    st.subheader("Tren Rata-rata Penyewaan per Bulan")
     if not filtered_df.empty:
-        # Menampilkan perbandingan Registered vs Casual
+        # Mengurutkan bulan secara kronologis sesuai pilihan
         actual_order = [m for m in month_options if m in selected_months]
         trend_data = filtered_df.groupby('mnth_name')[['casual', 'registered', 'cnt']].mean().reindex(actual_order)
         
@@ -69,13 +72,13 @@ with tab1:
         ax.legend()
         st.pyplot(fig)
     else:
-        st.warning("Silakan pilih minimal satu bulan.")
+        st.warning("⚠️ Silakan pilih bulan pada sidebar.")
 
 with tab2:
-    st.subheader("Penyewaan Berdasarkan Kecepatan Angin")
+    st.subheader("Dampak Kecepatan Angin terhadap Penyewaan")
     if not filtered_df.empty:
-        # Menghitung status angin berdasarkan rata-rata tahun yang dipilih
-        avg_wind_ref = filtered_df['windspeed'].mean()
+        # Logika: Membandingkan angin di atas vs di bawah rata-rata (Sesuai Notebook)
+        avg_wind_ref = df_main['windspeed'].mean()
         filtered_df['wind_status'] = filtered_df['windspeed'].apply(lambda x: 'Angin Tinggi' if x > avg_wind_ref else 'Angin Rendah')
         wind_impact = filtered_df.groupby('wind_status')['cnt'].mean()
         
@@ -83,3 +86,15 @@ with tab2:
         sns.barplot(x=wind_impact.index, y=wind_impact.values, palette='viridis', ax=ax)
         ax.set_ylabel("Rata-rata Penyewaan")
         st.pyplot(fig)
+
+# --- BAGIAN KESIMPULAN & REKOMENDASI (INTERAKTIF & DINAMIS) ---
+st.divider()
+st.subheader("Conclusion & Recommendation")
+
+# Fitur Interaktif Tambahan: Expander untuk eksplorasi detail
+with st.expander("Klik untuk melihat Detail Analisis & Rekomendasi"):
+    st.write(f"Berikut adalah hasil analisis untuk **{len(selected_months)} bulan** terpilih:")
+    
+    col_c, col_
+
+
