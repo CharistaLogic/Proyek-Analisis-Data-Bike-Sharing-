@@ -63,7 +63,7 @@ with tab1:
         st.warning("Silakan pilih bulan di sidebar.")
 
 with tab2:
-    st.subheader("Analisis Interaktif: Dampak Kecepatan Angin")
+    st.subheader("Pengaruh Kecepatan Angin")
     if not filtered_df.empty:
         avg_wind_val = float(df_all['windspeed'].mean())
         wind_threshold = st.slider("Tentukan Ambang Batas Kecepatan Angin:", 
@@ -103,6 +103,7 @@ with st.expander("Buka untuk melihat Detail Analisis & Rekomendasi"):
             2. **Kecepatan Angin:** Analisis menunjukkan kondisi angin rendah secara konsisten mendongkrak jumlah penyewaan.
             3. **Tipe Pengguna:** Pengguna Registered tetap menjadi penyumbang volume paling stabil dibandingkan Casual.
             """)
+            with col_c:
 
     with col_r:
         st.info("**Interactive Recommendation**")
@@ -116,5 +117,7 @@ with st.expander("Buka untuk melihat Detail Analisis & Rekomendasi"):
                 st.write(f"""
                 - **Marketing :** Berikan promo pada pengguna Casual untuk meningkatkan konversi ke Registered.
                 - **Retensi:** Perkuat program loyalitas bagi pengguna Registered di tahun {selected_year}.""")
+
+
 
 st.caption("Copyright © Charista Septi Dwi Artamy - 2026")
