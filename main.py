@@ -99,14 +99,24 @@ with st.expander("Buka untuk melihat Detail Analisis & Rekomendasi"):
 
     with col_r:
         st.info("**Interactive Recommendation**")
-        # Konten rekomendasi berubah berdasarkan pilihan radio button
-        if strategy_choice == "Optimasi Stok":
-            st.info(f"**Rekomendasi:** Berdasarkan tren di tahun {selected_year}, lakukan penambahan unit sepeda pada bulan **{max_month}** dan periode pertengahan tahun untuk memenuhi lonjakan permintaan.")
-        elif strategy_choice == "Manajemen Cuaca":
-            st.info("**Rekomendasi:** Menyiapkan tim operasional ekstra untuk pengecekan armada pada hari-hari dengan prediksi angin rendah, guna memastikan ketersediaan unit tetap aman.")
-        elif strategy_choice == "Retensi Pengguna":
-            st.info("**Rekomendasi:** Mengingat pengguna Registered adalah pilar utama, kembangkan program poin atau langganan khusus untuk menjaga loyalitas mereka di setiap musim.")
-        elif strategy_choice == "Promo Casual":
-            st.info("**Rekomendasi:** Berikan promo 'Weekend Ride' atau diskon pada jam-jam tertentu untuk menarik pengguna Casual agar beralih menggunakan layanan secara rutin.")
-
+        if not filtered_df.empty:
+            # Fitur Interaktif Tambahan: Radio button di dalam expander
+            rec_type = st.radio(
+                "Pilih Fokus Rekomendasi:",
+                ["Operasional", "Marketing & Strategi"],
+                horizontal=True
+            )
+    
+            if rec_type == "Operasional":
+                st.write(f"""
+                - **Optimalisasi Unit:** Segera lakukan penambahan stok dan pengecekan armada pada bulan **{max_month}** karena merupakan puncak permintaan.
+                - **Manajemen Cuaca:** Menyesuaikan distribusi sepeda berdasarkan prediksi kecepatan angin harian untuk menjaga kenyamanan pengguna.
+                """)
+            else:
+                st.write(f"""
+                - **Strategi Marketing:** Memberikan promo khusus pada pengguna Casual untuk meningkatkan konversi menjadi Registered.
+                - **Retensi:** Mengembangkan program loyalitas bagi pengguna Registered agar frekuensi penyewaan tetap stabil di tahun {selected_year}.
+                """)
+        else:
+            st.write("Silakan pilih data pada sidebar untuk melihat rekomendasi.")
 st.caption("Copyright © Charista Septi Dwi Artamy - 2026")
