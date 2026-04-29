@@ -44,7 +44,7 @@ with col3:
 st.divider()
 
 # --- VISUALISASI DATA ---
-tab1, tab2 = st.tabs(["📊 Tren & Tipe Pengguna", "🌬️ Dampak Kecepatan Angin"])
+tab1, tab2 = st.tabs(["Tren & Tipe Pengguna", "Pengaruh Kecepatan Angin"])
 
 with tab1:
     st.subheader(f"Tren Rata-rata Penyewaan per Bulan ({selected_year})")
@@ -85,4 +85,22 @@ if not filtered_df.empty:
 
 # 2. Rekomendasi Interaktif (User bisa memilih aksi)
 st.markdown("### 💡 Interactive Strategy Recommendation")
-st.write("Pilih fokus
+st.write("Pilih fokus strategi di bawah ini untuk melihat detail rekomendasi:")
+
+strategy_choice = st.radio(
+    "Pilih Fokus Strategi:",
+    ["Optimasi Stok", "Manajemen Cuaca", "Retensi Pengguna", "Promo Casual"],
+    horizontal=True
+)
+
+# Konten rekomendasi berubah berdasarkan pilihan radio button
+if strategy_choice == "Optimasi Stok":
+    st.info(f"**Rekomendasi:** Berdasarkan tren di tahun {selected_year}, lakukan penambahan unit sepeda pada bulan **{max_month}** dan periode pertengahan tahun untuk memenuhi lonjakan permintaan.")
+elif strategy_choice == "Manajemen Cuaca":
+    st.info("**Rekomendasi:** Menyiapkan tim operasional ekstra untuk pengecekan armada pada hari-hari dengan prediksi angin rendah, guna memastikan ketersediaan unit tetap aman.")
+elif strategy_choice == "Retensi Pengguna":
+    st.info("**Rekomendasi:** Mengingat pengguna Registered adalah pilar utama, kembangkan program poin atau langganan khusus untuk menjaga loyalitas mereka di setiap musim.")
+elif strategy_choice == "Promo Casual":
+    st.info("**Rekomendasi:** Berikan promo 'Weekend Ride' atau diskon pada jam-jam tertentu untuk menarik pengguna Casual agar beralih menggunakan layanan secara rutin.")
+
+st.caption("Copyright © Charista Septi Dwi Artamy - 2026")
