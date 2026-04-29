@@ -20,7 +20,7 @@ def load_data():
 df_all = load_data()
 
 # --- SIDEBAR (FILTER INTERAKTIF) ---
-st.sidebar.title("🚲 Opsi Filter")
+st.sidebar.title("🚲 Filter Analysis")
 selected_year = st.sidebar.selectbox("Pilih Tahun:", options=['2011', '2012'], index=1)
 month_options = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 selected_months = st.sidebar.multiselect("Pilih Bulan:", options=month_options, default=month_options)
@@ -72,7 +72,7 @@ with tab2:
         ax.set_ylabel("Rata-rata Penyewaan")
         st.pyplot(fig)
 
-# --- BAGIAN INTERAKTIF: CONCLUSION & RECOMMENDATION ---
+# --- CONCLUSION & RECOMMENDATION ---
 st.divider()
 st.subheader("Conclusion & Recommendation")
 
@@ -84,9 +84,9 @@ with st.expander("Buka untuk melihat Detail Analisis & Rekomendasi"):
     
     with col_c:
         st.success("**Conclusion**")
-        # Logika Dinamis: Angka dan teks berubah otomatis mengikuti filter
+        # Angka dan teks berubah otomatis mengikuti filter
         if not filtered_df.empty:
-            # Mencari bulan dengan rata-rata tertinggi dari data yang di-filter
+            # Mencari bulan dengan rata-rata tertinggi dari data yang difilter
             max_month = filtered_df.groupby('mnth_name')['cnt'].mean().idxmax()
             avg_cnt = filtered_df['cnt'].mean()
             st.write(f"""
@@ -100,7 +100,7 @@ with st.expander("Buka untuk melihat Detail Analisis & Rekomendasi"):
     with col_r:
         st.info("**Interactive Recommendation**")
         if not filtered_df.empty:
-            # Fitur Interaktif Tambahan: Radio button di dalam expander
+            # Fitur Interaktif Tambahan -> Radio button di dalam expander
             rec_type = st.radio(
                 "Pilih Fokus Rekomendasi:",
                 ["Operasional", "Marketing & Strategi"],
@@ -109,13 +109,13 @@ with st.expander("Buka untuk melihat Detail Analisis & Rekomendasi"):
     
             if rec_type == "Operasional":
                 st.write(f"""
-                - **Optimalisasi Unit:** Segera lakukan penambahan stok dan pengecekan armada pada bulan **{max_month}** karena merupakan puncak permintaan.
-                - **Manajemen Cuaca:** Menyesuaikan distribusi sepeda berdasarkan prediksi kecepatan angin harian untuk menjaga kenyamanan pengguna.
+                - Segera lakukan penambahan stok dan pengecekan armada pada bulan **{max_month}** karena merupakan puncak permintaan.
+                - **Manajemen Cuaca,** Menyesuaikan distribusi sepeda berdasarkan prediksi kecepatan angin harian untuk menjaga kenyamanan pengguna.
                 """)
             else:
                 st.write(f"""
-                - **Strategi Marketing:** Memberikan promo khusus pada pengguna Casual untuk meningkatkan konversi menjadi Registered.
-                - **Retensi:** Mengembangkan program loyalitas bagi pengguna Registered agar frekuensi penyewaan tetap stabil di tahun {selected_year}.
+                - Memberikan promo khusus pada pengguna Casual untuk meningkatkan konversi menjadi Registered.
+                - Mengembangkan program loyalitas bagi pengguna Registered agar frekuensi penyewaan tetap stabil di tahun {selected_year}.
                 """)
         else:
             st.write("Silakan pilih data pada sidebar untuk melihat rekomendasi.")
