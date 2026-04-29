@@ -72,35 +72,52 @@ with tab2:
         ax.set_ylabel("Rata-rata Penyewaan")
         st.pyplot(fig)
 
-# --- BAGIAN KESIMPULAN & REKOMENDASI (SANGAT INTERAKTIF) ---
+# --- BAGIAN INTERAKTIF: CONCLUSION & RECOMMENDATION ---
 st.divider()
-st.subheader("Conclusion & Interactive Recommendation")
+st.subheader("Conclusion & Recommendation")
 
-# 1. Kesimpulan Dinamis (Otomatis berubah mengikuti filter)
-if not filtered_df.empty:
-    max_month = filtered_df.groupby('mnth_name')['cnt'].mean().idxmax()
-    avg_rent = filtered_df['cnt'].mean()
+# Fitur Interaktif: Expander (User harus klik untuk membaca)
+with st.expander("Buka untuk melihat Detail Analisis & Rekomendasi"):
+    st.write(f"### Analisis Tahun {selected_year} untuk {len(selected_months)} Bulan Terpilih:")
     
-    st.success(f"**Conclusion:** Berdasarkan data tahun {selected_year}, puncak penyewaan terjadi pada bulan **{max_month}** dengan rata-rata harian **{avg_rent:.0f}** sepeda. Kondisi angin rendah terbukti meningkatkan minat pengguna secara signifikan.")
+    col_c, col_r = st.columns(2)
+    
+    with col_c:
+        st.success("**Conclusion**")
+        # Logika Dinamis: Angka dan teks berubah otomatis mengikuti filter
+        if not filtered_df.empty:
+            # Mencari bulan dengan rata-rata tertinggi dari data yang di-filter
+            max_month = filtered_df.groupby('mnth_name')['cnt'].mean().idxmax()
+            avg_cnt = filtered_df['cnt'].mean()
+            st.write(f"""
+            1. **Tren:** Pada periode {selected_year}, puncak permintaan terjadi di bulan **{max_month}** dengan rata-rata **{avg_cnt:.0f}** penyewaan per hari.
+            2. **Kecepatan Angin:** Analisis menunjukkan bahwa kondisi angin rendah secara konsisten mendongkrak jumlah penyewaan.
+            3. **Tipe Pengguna:** Pengguna Registered tetap menjadi penyumbang volume penyewaan yang paling stabil dibandingkan Casual.
+            """)
+        else:
+            st.write("Silakan pilih data pada sidebar untuk melihat kesimpulan.")
 
-# 2. Rekomendasi Interaktif (User bisa memilih aksi)
-st.markdown("### 💡 Interactive Strategy Recommendation")
-st.write("Pilih fokus strategi di bawah ini untuk melihat detail rekomendasi:")
-
-strategy_choice = st.radio(
-    "Pilih Fokus Strategi:",
-    ["Optimasi Stok", "Manajemen Cuaca", "Retensi Pengguna", "Promo Casual"],
-    horizontal=True
-)
-
-# Konten rekomendasi berubah berdasarkan pilihan radio button
-if strategy_choice == "Optimasi Stok":
-    st.info(f"**Rekomendasi:** Berdasarkan tren di tahun {selected_year}, lakukan penambahan unit sepeda pada bulan **{max_month}** dan periode pertengahan tahun untuk memenuhi lonjakan permintaan.")
-elif strategy_choice == "Manajemen Cuaca":
-    st.info("**Rekomendasi:** Menyiapkan tim operasional ekstra untuk pengecekan armada pada hari-hari dengan prediksi angin rendah, guna memastikan ketersediaan unit tetap aman.")
-elif strategy_choice == "Retensi Pengguna":
-    st.info("**Rekomendasi:** Mengingat pengguna Registered adalah pilar utama, kembangkan program poin atau langganan khusus untuk menjaga loyalitas mereka di setiap musim.")
-elif strategy_choice == "Promo Casual":
-    st.info("**Rekomendasi:** Berikan promo 'Weekend Ride' atau diskon pada jam-jam tertentu untuk menarik pengguna Casual agar beralih menggunakan layanan secara rutin.")
+    with col_r:
+        st.info("**Interactive Recommendation**")
+        if not filtered_df.empty:
+            # Fitur Interaktif: Radio button untuk memilih tipe rekomendasi
+            rec_type = st.radio(
+                "Pilih Fokus Rekomendasi:",
+                ["Operasional", "Marketing & Strategi"],
+                horizontal=True
+            )
+            
+            if rec_type == "Operasional":
+                st.write(f"""
+                - **Optimalisasi Unit:** Segera lakukan penambahan stok dan pengecekan armada pada bulan **{max_month}** karena merupakan puncak permintaan.
+                - **Manajemen Cuaca:** Menyesuaikan distribusi sepeda berdasarkan prediksi kecepatan angin harian untuk menjaga keamanan pengguna.
+                """)
+            else:
+                st.write(f"""
+                - **Strategi Marketing:** Memberikan promo khusus pada pengguna Casual di bulan-bulan panas untuk meningkatkan konversi menjadi Registered.
+                - **Retensi:** Mengembangkan program loyalitas bagi pengguna Registered agar frekuensi penyewaan tetap stabil di tahun {selected_year}.
+                """)
+        else:
+            st.write("Silakan pilih data pada sidebar untuk melihat rekomendasi.")
 
 st.caption("Copyright © Charista Septi Dwi Artamy - 2026")
