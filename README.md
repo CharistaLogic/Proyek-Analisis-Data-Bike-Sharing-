@@ -38,6 +38,47 @@ Dataset berisi informasi harian penyewaan sepeda seperti:
 - Angin rendah meningkatkan jumlah penyewaan
 - Pengguna registered lebih stabil dibanding casual
 
-## Run Steamlit App
+
+##Setup Evironment
+Pastikan Python sudah terinstall di perangkat Anda.
+Bisa menggunakan : 
+- Python 3.10 atau 3.11
+Cek versi Python:
+python --version
+
+#Instalasi Dependencies
+Install semua library yang dibutuhkan:
+pip install pandas matplotlib seaborn streamlit
+
+##Struktur Folder Proyek
+Pastikan struktur folder seperti berikut:
+project/
+│
+├── data/
+│   └── day.csv
+│
+├── app.py
+│
+├── notebook.ipynb
+│
+└── README.md
+
+##Cara Deploy
+Dashboard dapat di-deploy menggunakan Streamlit Cloud:
+1. Upload project ke GitHub
+2. Buka https://streamlit.io/cloud
+3. Pilih repository
+4. Jalankan app.py
+
+## Menjalankan Dashboard Streamlit
+Setelah semua dependency terinstall, jalankan dashboard dengan perintah: 
 ```bash id=" " 
 streamlit run main.py
+
+'##Cara Deploy'
+Dashboard dapat di-deploy menggunakan Streamlit Cloud:
+1. Upload project ke GitHub
+2. Buka https://streamlit.io/cloud
+3. Pilih repository
+4. Jalankan app.py
+
