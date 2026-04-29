@@ -78,7 +78,7 @@ Setelah semua dependency terinstall, jalankan dashboard dengan perintah:
 Setelah dijalankan, dashboard akan otomatis terbuka di browser:
 http://localhost:8501
 
-'##Cara Deploy'
+##Cara Deploy
 Dashboard dapat di-deploy menggunakan Streamlit Cloud:
 1. Upload project ke GitHub
 2. Buka https://streamlit.io/cloud
