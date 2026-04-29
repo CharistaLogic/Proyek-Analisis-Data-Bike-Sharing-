@@ -20,7 +20,7 @@ def load_data():
 df_all = load_data()
 
 # --- SIDEBAR (FILTERING---
-st.sidebar.title("🚲 Filter Analyst")
+st.sidebar.title("Filter Analyst")
 selected_year = st.sidebar.selectbox("Pilih Tahun:", options=['2011', '2012'], index=1)
 month_options = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 selected_months = st.sidebar.multiselect("Pilih Bulan:", options=month_options, default=month_options)
