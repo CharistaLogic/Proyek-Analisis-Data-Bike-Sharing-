@@ -103,7 +103,6 @@ with st.expander("Buka untuk melihat Detail Analisis & Rekomendasi"):
             2. **Kecepatan Angin:** Analisis menunjukkan kondisi angin rendah secara konsisten mendongkrak jumlah penyewaan.
             3. **Tipe Pengguna:** Pengguna Registered tetap menjadi penyumbang volume paling stabil dibandingkan Casual.
             """)
-            with col_c:
 
     with col_r:
         st.info("**Interactive Recommendation**")
