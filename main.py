@@ -71,9 +71,9 @@ selected_months = st.sidebar.multiselect(
     default=month_options
 )
 
-# =====================================================
-# FILTER DATA (FIX REVISI)
-# =====================================================
+# =============================================
+# FILTER DATA
+# =============================================
 filtered_df = df_main[
     (df_main["yr_name"] == selected_year) &
     (df_main["mnth_name"].isin(selected_months))
@@ -88,26 +88,26 @@ if not filtered_df.empty:
 else:
     threshold_wind = 0
 
-# =====================================================
+# ======================================
 # HEADER
-# =====================================================
+# ======================================
 st.title("Dashboard Analisis Penyewaan Sepeda")
 st.markdown(
     "**Nama:** Charista Septi Dwi Artamy | "
     "**ID Dicoding:** CDCC183D6X2720"
 )
 
-# =====================================================
-# HANDLE DATA KOSONG (FIX REVISI)
-# =====================================================
+# ======================================
+# HANDLE DATA KOSONG
+# ======================================
 if filtered_df.empty:
     st.warning("⚠️ Tidak ada data yang sesuai dengan filter.")
     st.info("Silakan pilih bulan lain atau ubah tahun.")
     st.stop()
 
-# =====================================================
+# =======================================
 # METRIC CARDS
-# =====================================================
+# =======================================
 col1, col2, col3 = st.columns(3)
 with col1:
     st.metric("Total Penyewaan", f"{int(filtered_df['cnt'].sum()):,}")
@@ -118,9 +118,9 @@ with col3:
 
 st.divider()
 
-# =====================================================
+# =======================================
 # TABS
-# =====================================================
+# =======================================
 tab1, tab2, tab3, tab4, tab5 = st.tabs([
     "Perbandingan Tahun",
     "Tren Bulanan",
@@ -178,7 +178,7 @@ with tab3:
     ax.legend()
     st.pyplot(fig)
 
-# TAB 4 (FIX TOTAL)
+# TAB 4
 with tab4:
     st.subheader("Dampak Kecepatan Angin Terhadap Penyewaan")
 
@@ -211,9 +211,9 @@ with tab5:
         sns.heatmap(corr_matrix, annot=True, ax=ax)
         st.pyplot(fig)
 
-# =====================================================
-# CONCLUSION & RECOMMENDATION (TIDAK DIUBAH)
-# =====================================================
+# =============================
+# CONCLUSION & RECOMMENDATION 
+# =============================
 st.divider()
 st.subheader("Conclusion & Recommendation")
 
