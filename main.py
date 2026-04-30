@@ -87,6 +87,11 @@ filtered_df = df_main[
     (df_main["mnth_name"].isin(selected_months))
 ].copy()
 
+threshold_wind = df_main["windspeed"].mean()
+filtered_df["wind_status"] = filtered_df["windspeed"].apply(
+    lambda x: "Tinggi" if x > threshold_wind else "Rendah"
+)
+
 # =====================================================
 # HEADER
 # =====================================================
