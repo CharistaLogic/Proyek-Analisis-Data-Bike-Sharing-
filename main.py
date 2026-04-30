@@ -50,7 +50,7 @@ def load_data():
 df_main = load_data()
 
 # =====================================================
-# SIDEBAR
+# SIDEBAR FILTER
 # =====================================================
 st.sidebar.title("Filter Analisis")
 
@@ -72,14 +72,14 @@ selected_months = st.sidebar.multiselect(
 )
 
 # =====================================================
-# FILTER DATA (FIXED)
+# FILTER DATA (FIX REVISI)
 # =====================================================
 filtered_df = df_main[
     (df_main["yr_name"] == selected_year) &
     (df_main["mnth_name"].isin(selected_months))
 ].copy()
 
-# FIX: threshold dinamis + tidak duplikasi
+# FIX: threshold dinamis + satu kali saja
 if not filtered_df.empty:
     threshold_wind = filtered_df["windspeed"].mean()
     filtered_df["wind_status"] = filtered_df["windspeed"].apply(
@@ -92,24 +92,29 @@ else:
 # HEADER
 # =====================================================
 st.title("Dashboard Analisis Penyewaan Sepeda")
-st.markdown("**Nama:** Charista Septi Dwi Artamy | **ID Dicoding:** CDCC183D6X2720")
+st.markdown(
+    "**Nama:** Charista Septi Dwi Artamy | "
+    "**ID Dicoding:** CDCC183D6X2720"
+)
 
 # =====================================================
-# EMPTY HANDLING (UX FIX)
+# HANDLE DATA KOSONG (FIX REVISI)
 # =====================================================
 if filtered_df.empty:
-    st.warning("⚠️ Tidak ada data sesuai filter.")
+    st.warning("⚠️ Tidak ada data yang sesuai dengan filter.")
     st.info("Silakan pilih bulan lain atau ubah tahun.")
     st.stop()
 
 # =====================================================
-# METRIC
+# METRIC CARDS
 # =====================================================
 col1, col2, col3 = st.columns(3)
-
-col1.metric("Total Penyewaan", f"{int(filtered_df['cnt'].sum()):,}")
-col2.metric("Rata-rata Suhu", f"{filtered_df['temp'].mean():.2f}")
-col3.metric("Rata-rata Kecepatan Angin", f"{filtered_df['windspeed'].mean():.2f}")
+with col1:
+    st.metric("Total Penyewaan", f"{int(filtered_df['cnt'].sum()):,}")
+with col2:
+    st.metric("Rata-rata Suhu", f"{filtered_df['temp'].mean():.2f}")
+with col3:
+    st.metric("Rata-rata Kecepatan Angin", f"{filtered_df['windspeed'].mean():.2f}")
 
 st.divider()
 
@@ -124,7 +129,7 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs([
     "Analisis Suhu"
 ])
 
-# TAB 1 (GLOBAL - FIX: kasih keterangan)
+# TAB 1 (GLOBAL + FIX KETERANGAN)
 with tab1:
     st.subheader("Perbandingan Tren Penyewaan 2011 vs 2012")
     st.caption("Visualisasi ini menggunakan seluruh data (tidak terpengaruh filter).")
@@ -134,6 +139,8 @@ with tab1:
 
     fig, ax = plt.subplots(figsize=(10, 5))
     yearly_trend.plot(marker="o", linewidth=2, ax=ax)
+    ax.set_xlabel("Bulan")
+    ax.set_ylabel("Rata-rata Penyewaan")
     st.pyplot(fig)
 
 # TAB 2
@@ -173,19 +180,20 @@ with tab3:
 
 # TAB 4 (FIX TOTAL)
 with tab4:
-    st.subheader("Dampak Kecepatan Angin")
+    st.subheader("Dampak Kecepatan Angin Terhadap Penyewaan")
 
     wind_analysis = filtered_df.groupby("wind_status")["cnt"].mean().reindex(["Rendah", "Tinggi"])
 
     fig, ax = plt.subplots()
     sns.barplot(x=wind_analysis.index, y=wind_analysis.values, ax=ax)
+    ax.set_ylabel("Rata-rata Penyewaan harian")
     st.pyplot(fig)
 
     st.caption(f"Ambang batas kecepatan angin (dinamis): {threshold_wind:.2f}")
 
 # TAB 5
 with tab5:
-    st.subheader("Analisis Suhu & Korelasi")
+    st.subheader("Analisis Korelasi & Faktor Lingkungan")
 
     col_x, col_y = st.columns(2)
 
@@ -199,11 +207,12 @@ with tab5:
 
     with col_y:
         fig, ax = plt.subplots()
-        corr = filtered_df[["temp", "atemp", "hum", "windspeed", "cnt"]].corr()
-        sns.heatmap(corr, annot=True, ax=ax)
+        corr_matrix = filtered_df[["temp", "atemp", "hum", "windspeed", "cnt"]].corr()
+        sns.heatmap(corr_matrix, annot=True, ax=ax)
         st.pyplot(fig)
+
 # =====================================================
-# CONCLUSION & RECOMMENDATION (VERSI INTERAKTIF)
+# CONCLUSION & RECOMMENDATION (TIDAK DIUBAH)
 # =====================================================
 st.divider()
 st.subheader("Conclusion & Recommendation")
@@ -217,14 +226,13 @@ with st.expander("Klik untuk melihat Detail Analisis & Rekomendasi Strategis"):
         avg_cas = int(filtered_df["casual"].mean())
         dominant_user = "Registered" if avg_reg > avg_cas else "Casual"
         
-        # ✅ Sudah pakai wind_status dari atas (tidak duplikasi lagi)
         wind_analysis = filtered_df.groupby("wind_status")["cnt"].mean()
         wind_res = "rendah meningkatkan minat penyewaan" if wind_analysis.get("Rendah", 0) > wind_analysis.get("Tinggi", 0) else "tinggi meningkatkan minat penyewaan"
 
         col_conc, col_rec = st.columns(2)
 
         with col_conc:
-            st.info("### 📝 Conclusion")
+            st.info("### Conclusion")
             st.markdown(f"""
             1. **Puncak Permintaan:** Pada periode {selected_year}, bulan **{peak_month}** menjadi periode dengan aktivitas penyewaan tertinggi.
             2. **Volume Harian:** Rata-rata penyewaan mencapai **{avg_rental:,} unit** per hari di bawah filter yang dipilih.
@@ -233,7 +241,7 @@ with st.expander("Klik untuk melihat Detail Analisis & Rekomendasi Strategis"):
             """)
 
         with col_rec:
-            st.success("### 💡 Recommendation")
+            st.success("### Recommendation")
             rec_focus = st.radio(
                 "Pilih Fokus Strategi:",
                 ["Manajemen Operasional", "Pemasaran & Pertumbuhan"],
@@ -255,4 +263,4 @@ with st.expander("Klik untuk melihat Detail Analisis & Rekomendasi Strategis"):
     else:
         st.warning("⚠️ Data tidak tersedia. Harap sesuaikan filter di sidebar.")
 
-st.caption("Copyright © 2026")
+st.caption("Copyright © Charista Septi Dwi Artamy - 2026")
