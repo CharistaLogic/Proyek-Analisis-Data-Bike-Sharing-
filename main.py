@@ -3,112 +3,250 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# 1. Konfigurasi Halaman
-st.set_page_config(page_title="Bike Sharing Dashboard", layout="wide")
+# =====================================================
+# KONFIGURASI HALAMAN
+# =====================================================
+st.set_page_config(
+    page_title="Bike Sharing Analysis Dashboard",
+    layout="wide"
+)
 
-# 2. Fungsi Memuat Data
+# Set style seaborn agar visualisasi konsisten
+sns.set(style="whitegrid")
+
+# =====================================================
+# LOAD DATA
+# =====================================================
 @st.cache_data
 def load_data():
-    df = pd.read_csv("day.csv")
-    df['dteday'] = pd.to_datetime(df['dteday'])
-    df['year_label'] = df['yr'].map({0: '2011', 1: '2012'})
-    month_map = {1: 'Jan', 2: 'Feb', 3: 'Mar', 4: 'Apr', 5: 'May', 6: 'Jun',
-                 7: 'Jul', 8: 'Aug', 9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Dec'}
-    df['mnth_name'] = df['mnth'].map(month_map)
+    # Gunakan penanganan error jika file tidak ditemukan
+    try:
+        df = pd.read_csv("day.csv")
+    except FileNotFoundError:
+        st.error("File 'day.csv' tidak ditemukan. Pastikan file ada di direktori yang sama.")
+        return pd.DataFrame()
+
+    # Data Wrangling: Pastikan kolom tanggal benar-benar bertipe datetime
+    df["dteday"] = pd.to_datetime(df["dteday"])
+
+    # Mapping tahun dan bulan agar filter lebih "manusiawi"
+    year_map = {0: "2011", 1: "2012"}
+    month_map = {
+        1: "Jan", 2: "Feb", 3: "Mar", 4: "Apr", 5: "May", 6: "Jun",
+        7: "Jul", 8: "Aug", 9: "Sep", 10: "Oct", 11: "Nov", 12: "Dec"
+    }
+
+    df["yr_name"] = df["yr"].map(year_map)
+    df["mnth_name"] = df["mnth"].map(month_map)
+
+    # Menambahkan kategori suhu untuk tab analisis suhu
+    def get_temp_category(temp_val):
+        if temp_val < 0.33:
+            return "Cold"
+        elif temp_val < 0.66:
+            return "Moderate"
+        else:
+            return "Hot"
+
+    df["temp_category"] = df["temp"].apply(get_temp_category)
+
     return df
 
-df_all = load_data()
+df_main = load_data()
 
-# --- SIDEBAR (FILTERING---
-st.sidebar.title("Filter Analyst")
-selected_year = st.sidebar.selectbox("Pilih Tahun:", options=['2011', '2012'], index=1)
-month_options = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-selected_months = st.sidebar.multiselect("Pilih Bulan:", options=month_options, default=month_options)
+# =====================================================
+# SIDEBAR FILTER
+# =====================================================
+st.sidebar.title("Filter Analisis")
 
-# Eksekusi Filter Utama
-filtered_df = df_all[(df_all['year_label'] == selected_year) & (df_all['mnth_name'].isin(selected_months))].copy()
+# Filter Tahun
+selected_year = st.sidebar.selectbox(
+    "Pilih Tahun:",
+    options=["2011", "2012"],
+    index=1 # Default ke 2012
+)
 
-# --- HALAMAN UTAMA ---
-st.title("Bike Sharing Analysis Dashboard")
-st.markdown(f"**Nama:** Charista Septi Dwi Artamy | **ID Dicoding:** CDCC183D6X2720")
+# Filter Bulan
+month_options = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+]
 
-# Metrik Dinamis
-col1, col2, col3 = st.columns(3)
-with col1:
-    st.metric(f"Total Penyewaan ({selected_year})", f"{filtered_df['cnt'].sum():,}")
-with col2:
-    st.metric("Rata-rata User Registered", f"{filtered_df['registered'].mean():.0f}" if not filtered_df.empty else 0)
-with col3:
-    st.metric("Rata-rata User Casual", f"{filtered_df['casual'].mean():.0f}" if not filtered_df.empty else 0)
+selected_months = st.sidebar.multiselect(
+    "Pilih Bulan:",
+    options=month_options,
+    default=month_options
+)
+
+# =====================================================
+# FILTER DATA
+# =====================================================
+# Menambahkan .copy() untuk menghindari SettingWithCopyWarning
+filtered_df = df_main[
+    (df_main["yr_name"] == selected_year) &
+    (df_main["mnth_name"].isin(selected_months))
+].copy()
+
+# =====================================================
+# HEADER
+# =====================================================
+st.title("Dashboard Analisis Penyewaan Sepeda")
+st.markdown(
+    "**Nama:** Charista Septi Dwi Artamy | "
+    "**ID Dicoding:** CDCC183D6X2720"
+)
+
+# =====================================================
+# METRIC CARDS
+# =====================================================
+if not filtered_df.empty:
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("Total Penyewaan", f"{int(filtered_df['cnt'].sum()):,}")
+    with col2:
+        st.metric("Rata-rata Suhu", f"{filtered_df['temp'].mean():.2f}")
+    with col3:
+        st.metric("Rata-rata Kecepatan Angin", f"{filtered_df['windspeed'].mean():.2f}")
+else:
+    st.warning("⚠️ Silakan pilih setidaknya satu bulan pada filter.")
 
 st.divider()
 
-# --- VISUALISASI DATA ---
-tab1, tab2 = st.tabs(["Tren & Tipe Pengguna", "Pengaruh Kecepatan Angin"])
+# =====================================================
+# TABS
+# =====================================================
+tab1, tab2, tab3, tab4, tab5 = st.tabs([
+    "Perbandingan Tahun",
+    "Tren Bulanan",
+    "Casual vs Registered",
+    "Kecepatan Angin",
+    "Analisis Suhu"
+])
 
+# 1. PERBANDINGAN TAHUN (Global View)
 with tab1:
-    st.subheader(f"Tren Rata-rata Penyewaan per Bulan ({selected_year})")
+    st.subheader("Perbandingan Tren Penyewaan 2011 vs 2012")
+    yearly_trend = df_main.groupby(["mnth_name", "yr_name"])["cnt"].mean().unstack()
+    yearly_trend = yearly_trend.reindex(month_options)
+
+    fig, ax = plt.subplots(figsize=(10, 5))
+    yearly_trend.plot(marker="o", linewidth=2, ax=ax, color=['#FF9999', '#66B2FF'])
+    ax.set_xlabel("Bulan")
+    ax.set_ylabel("Rata-rata Penyewaan")
+    st.pyplot(fig)
+
+# 2. TREN BULANAN (Sesuai Filter)
+with tab2:
+    st.subheader(f"Tren Bulanan Tahun {selected_year}")
     if not filtered_df.empty:
         actual_order = [m for m in month_options if m in selected_months]
-        trend_data = filtered_df.groupby('mnth_name')[['casual', 'registered', 'cnt']].mean().reindex(actual_order)
+        monthly_mean = filtered_df.groupby("mnth_name")["cnt"].mean().reindex(actual_order)
+        monthly_total = filtered_df.groupby("mnth_name")["cnt"].sum().reindex(actual_order)
+
+        col_a, col_b = st.columns(2)
+        with col_a:
+            fig, ax = plt.subplots(figsize=(8, 5))
+            ax.plot(monthly_mean.index, monthly_mean.values, marker="o", color='#2E7D32')
+            ax.set_title("Rata-rata Penyewaan per Hari")
+            st.pyplot(fig)
+        with col_b:
+            fig, ax = plt.subplots(figsize=(8, 5))
+            ax.bar(monthly_total.index, monthly_total.values, color='#81C784')
+            ax.set_title("Total Penyewaan per Bulan")
+            st.pyplot(fig)
+
+# 3. CASUAL VS REGISTERED
+with tab3:
+    st.subheader("Analisis Tipe Pengguna: Casual vs Registered")
+    if not filtered_df.empty:
+        actual_order = [m for m in month_options if m in selected_months]
+        user_analysis = filtered_df.groupby("mnth_name")[["casual", "registered"]].mean().reindex(actual_order)
+
         fig, ax = plt.subplots(figsize=(10, 5))
-        ax.plot(trend_data.index, trend_data['cnt'], marker='o', linewidth=2, label='Total', color='#2E7D32')
-        ax.bar(trend_data.index, trend_data['registered'], alpha=0.3, label='Registered', color='#1976D2')
-        ax.bar(trend_data.index, trend_data['casual'], alpha=0.3, label='Casual', color='#F57C00')
+        ax.plot(user_analysis.index, user_analysis["casual"], marker="o", label="Casual", color='#FF7043')
+        ax.plot(user_analysis.index, user_analysis["registered"], marker="o", label="Registered", color='#1976D2')
         ax.set_ylabel("Rata-rata Penyewaan")
         ax.legend()
         st.pyplot(fig)
-    else:
-        st.warning("Silakan pilih bulan di sidebar.")
 
-with tab2:
-    st.subheader("Pengaruh Kecepatan Angin")
+# 4. KECEPATAN ANGIN
+with tab4:
+    st.subheader("Dampak Kecepatan Angin Terhadap Penyewaan")
     if not filtered_df.empty:
-        avg_wind_val = float(df_all['windspeed'].mean())
-        wind_threshold = st.slider("Tentukan Ambang Batas Kecepatan Angin:", 
-                                   min_value=float(df_all['windspeed'].min()), 
-                                   max_value=float(df_all['windspeed'].max()), 
-                                   value=avg_wind_val, step=0.01)
+        # Menggunakan rata-rata seluruh data sebagai ambang batas tetap
+        threshold_wind = df_main["windspeed"].mean()
+        filtered_df["wind_status"] = filtered_df["windspeed"].apply(lambda x: "Tinggi" if x > threshold_wind else "Rendah")
+        
+        wind_analysis = filtered_df.groupby("wind_status")["cnt"].mean().reindex(["Rendah", "Tinggi"])
 
-        # Perbaikan label agar konsisten dengan reindex
-        filtered_df['wind_status'] = filtered_df['windspeed'].apply(
-            lambda x: 'High Wind' if x > wind_threshold else 'Low Wind')
-        wind_impact = filtered_df.groupby('wind_status')['cnt'].mean().reindex(['High Wind', 'Low Wind'])
         fig, ax = plt.subplots(figsize=(8, 5))
-        sns.barplot(x=wind_impact.index, y=wind_impact.values, palette='viridis', ax=ax)
-        ax.set_ylabel("Rata-rata Penyewaan")
+        sns.barplot(x=wind_analysis.index, y=wind_analysis.values, palette=['#4CAF50', '#E53935'], ax=ax)
+        ax.set_ylabel("Rata-rata Penyewaan harian")
         st.pyplot(fig)
-        st.write(f"Grafik menunjukkan perbandingan penyewaan berdasarkan ambang batas angin: **{wind_threshold:.2f}**")
+        st.write(f"Keterangan: Ambang batas kecepatan angin adalah **{threshold_wind:.2f}** (rata-rata keseluruhan).")
 
-# --- CONCLUSION & RECOMMENDATION ---
+# 5. ANALISIS SUHU & KORELASI
+with tab5:
+    st.subheader("Analisis Korelasi & Faktor Lingkungan")
+    if not filtered_df.empty:
+        col_x, col_y = st.columns(2)
+        with col_x:
+            actual_order = [m for m in month_options if m in selected_months]
+            temp_analysis = filtered_df.groupby(["mnth_name", "temp_category"])["cnt"].mean().unstack().reindex(actual_order)
+            fig, ax = plt.subplots(figsize=(8, 5))
+            temp_analysis.plot(kind="bar", ax=ax, cmap='viridis')
+            ax.set_title("Rata-rata Penyewaan per Kategori Suhu")
+            st.pyplot(fig)
+        with col_y:
+            fig, ax = plt.subplots(figsize=(8, 5))
+            corr_matrix = filtered_df[["temp", "atemp", "hum", "windspeed", "cnt"]].corr()
+            sns.heatmap(corr_matrix, annot=True, cmap="coolwarm", fmt=".2f", ax=ax)
+            ax.set_title("Heatmap Korelasi Variabel")
+            st.pyplot(fig)
+
+# =====================================================
+# CONCLUSION & RECOMMENDATION (DINAMIS & REVISI)
+# =====================================================
 st.divider()
 st.subheader("Conclusion & Recommendation")
-with st.expander("Buka untuk melihat Detail Analisis & Rekomendasi"):
-    st.write(f"### Analisis Tahun {selected_year} untuk {len(selected_months)} Bulan Terpilih:")
-    col_c, col_r = st.columns(2)
-    with col_c:
-        st.success("**Conclusion**")
-        if not filtered_df.empty:
-            # Mencari bulan dengan rata-rata penyewaan tertinggi
-            max_month = filtered_df.groupby('mnth_name')['cnt'].mean().idxmax()
-            avg_cnt = filtered_df['cnt'].mean()
-            st.write(f"""
-            1. **Tren:** Pada periode {selected_year}, puncak permintaan terjadi di bulan **{max_month}** dengan rata-rata **{avg_cnt:.0f}** penyewaan per hari.
-            2. **Kecepatan Angin:** Analisis menunjukkan kondisi angin rendah secara konsisten mendongkrak jumlah penyewaan.
-            3. **Tipe Pengguna:** Pengguna Registered tetap menjadi penyumbang volume paling stabil dibandingkan Casual.
-            """)
 
-    with col_r:
-        st.info("**Recommendation**")
-        if not filtered_df.empty:
-            rec_type = st.radio("Pilih Fokus Rekomendasi:", ["Operasional", "Marketing"], horizontal=True)
-            if rec_type == "Operasional":
-                st.write(f"""
-                - Segera lakukan penambahan stok dan pengecekan armada pada bulan **{max_month}** karena merupakan puncak permintaan.
-                - **Manajemen Cuaca,** Menyesuaikan distribusi sepeda berdasarkan prediksi kecepatan angin harian untuk menjaga kenyamanan pengguna.""")
-            else:
-                st.write(f"""
-                - **Marketing :** Berikan promo pada pengguna Casual untuk meningkatkan konversi ke Registered.
-                - **Retensi:** Perkuat program loyalitas bagi pengguna Registered di tahun {selected_year}.""")
+if not filtered_df.empty:
+    # Logic perhitungan untuk kesimpulan otomatis
+    peak_month = filtered_df.groupby("mnth_name")["cnt"].sum().idxmax()
+    avg_rental = int(filtered_df["cnt"].mean())
+    avg_reg = int(filtered_df["registered"].mean())
+    avg_cas = int(filtered_df["casual"].mean())
+    dominant_user = "Registered" if avg_reg > avg_cas else "Casual"
+    
+    # Korelasi Suhu
+    temp_corr = filtered_df[["temp", "cnt"]].corr().iloc[0, 1]
+    temp_rel = "positif (suhu naik, penyewaan naik)" if temp_corr > 0 else "negatif"
+
+    # Analisis Angin
+    wind_analysis = filtered_df.groupby("wind_status")["cnt"].mean()
+    wind_res = "rendah meningkatkan minat penyewaan" if wind_analysis.get("Rendah", 0) > wind_analysis.get("Tinggi", 0) else "tinggi meningkatkan minat penyewaan"
+
+    col_conc, col_rec = st.columns(2)
+
+    with col_conc:
+        st.info("### Conclusion")
+        st.markdown(f"""
+        1. Pada periode **{selected_year}**, permintaan tertinggi terjadi di bulan **{peak_month}**.
+        2. Rata-rata penggunaan harian mencapai **{avg_rental:,} unit**.
+        3. Tipe pengguna **{dominant_user}** memberikan kontribusi volume terbesar secara konsisten.
+        4. Analisis cuaca menunjukkan kondisi **{wind_res}**.
+        5. Suhu memiliki korelasi **{temp_rel}**.
+        """)
+
+    with col_rec:
+        st.success("### Recommendation")
+        st.markdown(f"""
+        1. **Optimasi Stok:** Tingkatkan ketersediaan sepeda di bulan **{peak_month}** untuk mengantisipasi lonjakan permintaan.
+        2. **Retensi Loyalitas:** Perkuat pengguna **{dominant_user}** melalui program membership atau poin reward.
+        3. **Strategi Cuaca:** Buat promo khusus "Cerah Ceria" pada hari dengan kecepatan angin rendah untuk menarik pengguna Casual.
+        4. **Pemasaran Musiman:** Manfaatkan korelasi positif suhu dengan meluncurkan kampanye iklan di musim yang lebih hangat.
+        """)
+else:
+    st.warning("⚠️ Pilih bulan untuk melihat kesimpulan.")
 
 st.caption("Copyright © Charista Septi Dwi Artamy - 2026")
