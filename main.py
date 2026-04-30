@@ -228,7 +228,7 @@ with st.expander("Klik untuk melihat Detail Analisis & Rekomendasi Strategis"):
         col_conc, col_rec = st.columns(2)
 
         with col_conc:
-            st.info("### 📝 Conclusion")
+            st.info("###Conclusion")
             st.markdown(f"""
             1. **Puncak Permintaan:** Pada periode {selected_year}, bulan **{peak_month}** menjadi periode dengan aktivitas penyewaan tertinggi.
             2. **Volume Harian:** Rata-rata penyewaan mencapai **{avg_rental:,} unit** per hari di bawah filter yang dipilih.
@@ -237,7 +237,7 @@ with st.expander("Klik untuk melihat Detail Analisis & Rekomendasi Strategis"):
             """)
 
         with col_rec:
-            st.success("### 💡 Recommendation")
+            st.success("###Recommendation")
             # FITUR INTERAKTIF: User bisa memilih fokus rekomendasi
             rec_focus = st.radio(
                 "Pilih Fokus Strategi:",
@@ -259,7 +259,5 @@ with st.expander("Klik untuk melihat Detail Analisis & Rekomendasi Strategis"):
                 """)
     else:
         st.warning("⚠️ Data tidak tersedia. Harap sesuaikan filter di sidebar.")
-
-st.caption("Copyright © Charista Septi Dwi Artamy - 2026")
-
+        
 st.caption("Copyright © Charista Septi Dwi Artamy - 2026")
