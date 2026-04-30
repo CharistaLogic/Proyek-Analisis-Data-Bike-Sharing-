@@ -48,6 +48,13 @@ def load_data():
     return df
 
 df_main = load_data()
+if df_main.empty:
+    st.error("Data gagal dimuat. Pastikan file day.csv ada di folder yang benar.")
+    st.stop()
+
+if "yr_name" not in df_main.columns:
+    st.error("Kolom 'yr_name' tidak ditemukan. Pastikan proses mapping berhasil.")
+    st.stop()
 
 # =====================================================
 # SIDEBAR FILTER
