@@ -54,7 +54,7 @@ pip install pandas matplotlib seaborn streamlit
 
 ## Menjalankan Dashboard Streamlit
 Setelah semua dependency terinstall, jalankan dashboard dengan perintah: 
- streamlit run main.py
+ streamlit run dashboard/main.py
 
 ## Akses Dashboard
 Setelah dijalankan, dashboard akan otomatis terbuka di browser:
