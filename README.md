@@ -49,19 +49,6 @@ Install semua library yang dibutuhkan:
 
 pip install pandas matplotlib seaborn streamlit
 
-##Struktur Folder Proyek
-Pastikan struktur folder seperti berikut:
-project/
-│
-├── data/
-│   └── day.csv
-│
-├── app.py
-│
-├── notebook.ipynb
-│
-└── README.md
-
 ## Cara Deploy
 Dashboard dapat di-deploy menggunakan Streamlit Cloud:
 1. Upload project ke GitHub
