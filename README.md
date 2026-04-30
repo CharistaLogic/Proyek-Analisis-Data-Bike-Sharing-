@@ -1,12 +1,13 @@
 # Proyek Bike Sharing Analysis Dashboard
 
 ## Project Overview
-Proyek ini bertujuan untuk menganalisis data penyewaan sepeda (Bike Sharing Dataset) guna memahami pola penggunaan berdasarkan waktu, kondisi cuaca, dan tipe pengguna.
+Proyek ini bertujuan untuk menganalisis data penyewaan sepeda (Bike Sharing Dataset) guna memahami pola penggunaan berdasarkan waktu dan tipe pengguna.
+Dashboard dibuat menggunakan Streamlit untuk menampilkan hasil analisis secara interaktif
 
 Dashboard dibuat menggunakan Streamlit untuk menampilkan hasil analisis secara interaktif.
 ## Business Questions
 1. Bagaimana perbedaan tren rata rata jumlah penyewa sepeda perbulan antara tahun 2011 dan 2012?
-2. Bagaimana pengaruh kecepatan angin terhadap jumlah penyewaan sepeda selama tahun 2011-2012?
+2. Bagaimana perbandingan rata-rata jumlah penyewaan sepeda antara pengguna casual dan registered pada setiap bulan selama tahun 2012?
 
 ## Tools & Libraries
 - Python
@@ -17,8 +18,7 @@ Dashboard dibuat menggunakan Streamlit untuk menampilkan hasil analisis secara i
 - Streamlit
 
 ## Dataset
-Dataset yang digunakan adalah: day.csv
-Dataset berisi informasi harian penyewaan sepeda seperti:
+Dataset yang digunakan adalah: **day.csv**, yang berisi informasi harian penyewaan sepeda seperti:
 - tanggal
 - musim
 - suhu
@@ -64,13 +64,8 @@ http://localhost:8501
 Dashboard dapat di-deploy menggunakan Streamlit Cloud:
 1. Upload project ke GitHub
 2. Buka https://streamlit.io/cloud
-3. Pilih repository
-4. Jalankan app.py
-
-## Cara Deploy
-Dashboard dapat di-deploy menggunakan Streamlit Cloud:
-1. Upload project ke GitHub
-2. Buka https://streamlit.io/cloud
-3. Pilih repository
-4. Jalankan app.py
+3. Klik New App
+4. Pilih repository
+5. Pilih file utama: main.py
+6. Klik Deploy
 
