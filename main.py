@@ -203,50 +203,63 @@ with tab5:
             sns.heatmap(corr_matrix, annot=True, cmap="coolwarm", fmt=".2f", ax=ax)
             ax.set_title("Heatmap Korelasi Variabel")
             st.pyplot(fig)
-
 # =====================================================
-# CONCLUSION & RECOMMENDATION (DINAMIS & REVISI)
+# CONCLUSION & RECOMMENDATION (VERSI INTERAKTIF)
 # =====================================================
 st.divider()
 st.subheader("Conclusion & Recommendation")
 
-if not filtered_df.empty:
-    # Logic perhitungan untuk kesimpulan otomatis
-    peak_month = filtered_df.groupby("mnth_name")["cnt"].sum().idxmax()
-    avg_rental = int(filtered_df["cnt"].mean())
-    avg_reg = int(filtered_df["registered"].mean())
-    avg_cas = int(filtered_df["casual"].mean())
-    dominant_user = "Registered" if avg_reg > avg_cas else "Casual"
+# Menggunakan Expander agar tampilan lebih bersih
+with st.expander("Klik untuk melihat Detail Analisis & Rekomendasi Strategis"):
     
-    # Korelasi Suhu
-    temp_corr = filtered_df[["temp", "cnt"]].corr().iloc[0, 1]
-    temp_rel = "positif (suhu naik, penyewaan naik)" if temp_corr > 0 else "negatif"
+    # Logic perhitungan otomatis berdasarkan filter yang dipilih user
+    if not filtered_df.empty:
+        peak_month = filtered_df.groupby("mnth_name")["cnt"].sum().idxmax()
+        avg_rental = int(filtered_df["cnt"].mean())
+        avg_reg = int(filtered_df["registered"].mean())
+        avg_cas = int(filtered_df["casual"].mean())
+        dominant_user = "Registered" if avg_reg > avg_cas else "Casual"
+        
+        # Penentuan korelasi angin secara otomatis
+        wind_analysis = filtered_df.groupby("wind_status")["cnt"].mean()
+        wind_res = "rendah meningkatkan minat penyewaan" if wind_analysis.get("Rendah", 0) > wind_analysis.get("Tinggi", 0) else "tinggi meningkatkan minat penyewaan"
 
-    # Analisis Angin
-    wind_analysis = filtered_df.groupby("wind_status")["cnt"].mean()
-    wind_res = "rendah meningkatkan minat penyewaan" if wind_analysis.get("Rendah", 0) > wind_analysis.get("Tinggi", 0) else "tinggi meningkatkan minat penyewaan"
+        # Layout kolom untuk memisahkan Kesimpulan dan Rekomendasi
+        col_conc, col_rec = st.columns(2)
 
-    col_conc, col_rec = st.columns(2)
+        with col_conc:
+            st.info("### 📝 Conclusion")
+            st.markdown(f"""
+            1. **Puncak Permintaan:** Pada periode {selected_year}, bulan **{peak_month}** menjadi periode dengan aktivitas penyewaan tertinggi.
+            2. **Volume Harian:** Rata-rata penyewaan mencapai **{avg_rental:,} unit** per hari di bawah filter yang dipilih.
+            3. **Profil Pengguna:** Tipe pengguna **{dominant_user}** mendominasi pasar, menunjukkan basis pelanggan yang kuat.
+            4. **Faktor Cuaca:** Terbukti bahwa kondisi **{wind_res}**, sesuai dengan hasil visualisasi pada tab sebelumnya.
+            """)
 
-    with col_conc:
-        st.info("### Conclusion")
-        st.markdown(f"""
-        1. Pada periode **{selected_year}**, permintaan tertinggi terjadi di bulan **{peak_month}**.
-        2. Rata-rata penggunaan harian mencapai **{avg_rental:,} unit**.
-        3. Tipe pengguna **{dominant_user}** memberikan kontribusi volume terbesar secara konsisten.
-        4. Analisis cuaca menunjukkan kondisi **{wind_res}**.
-        5. Suhu memiliki korelasi **{temp_rel}**.
-        """)
+        with col_rec:
+            st.success("### 💡 Recommendation")
+            # FITUR INTERAKTIF: User bisa memilih fokus rekomendasi
+            rec_focus = st.radio(
+                "Pilih Fokus Strategi:",
+                ["Manajemen Operasional", "Pemasaran & Pertumbuhan"],
+                horizontal=True
+            )
+            
+            if rec_focus == "Manajemen Operasional":
+                st.write(f"""
+                - **Alokasi Armada:** Menambah stok sepeda di titik-titik ramai pada bulan **{peak_month}**.
+                - **Mitigasi Cuaca:** Menyiapkan protokol pemeliharaan saat kecepatan angin masuk kategori 'Tinggi'.
+                - **Stabilitas:** Memastikan ketersediaan bagi pengguna **{dominant_user}** tetap terjaga di jam sibuk.
+                """)
+            else:
+                st.write(f"""
+                - **Kampanye Musiman:** Meluncurkan promo khusus pada bulan dengan permintaan rendah untuk menyeimbangkan okupansi.
+                - **Konversi Pengguna:** Mengajak pengguna Casual beralih ke Registered melalui diskon membership pada hari-hari dengan cuaca mendukung.
+                - **Loyalitas:** Memberikan reward eksklusif bagi pengguna **{dominant_user}** untuk mempertahankan retensi.
+                """)
+    else:
+        st.warning("⚠️ Data tidak tersedia. Harap sesuaikan filter di sidebar.")
 
-    with col_rec:
-        st.success("### Recommendation")
-        st.markdown(f"""
-        1. **Optimasi Stok:** Tingkatkan ketersediaan sepeda di bulan **{peak_month}** untuk mengantisipasi lonjakan permintaan.
-        2. **Retensi Loyalitas:** Perkuat pengguna **{dominant_user}** melalui program membership atau poin reward.
-        3. **Strategi Cuaca:** Buat promo khusus "Cerah Ceria" pada hari dengan kecepatan angin rendah untuk menarik pengguna Casual.
-        4. **Pemasaran Musiman:** Manfaatkan korelasi positif suhu dengan meluncurkan kampanye iklan di musim yang lebih hangat.
-        """)
-else:
-    st.warning("⚠️ Pilih bulan untuk melihat kesimpulan.")
+st.caption("Copyright © Charista Septi Dwi Artamy - 2026")
 
 st.caption("Copyright © Charista Septi Dwi Artamy - 2026")
