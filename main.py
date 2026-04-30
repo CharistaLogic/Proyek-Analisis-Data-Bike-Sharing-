@@ -87,10 +87,13 @@ filtered_df = df_main[
     (df_main["mnth_name"].isin(selected_months))
 ].copy()
 
-threshold_wind = df_main["windspeed"].mean()
-filtered_df["wind_status"] = filtered_df["windspeed"].apply(
-    lambda x: "Tinggi" if x > threshold_wind else "Rendah"
-)
+if not filtered_df.empty:
+    threshold_wind = filtered_df["windspeed"].mean()
+    filtered_df["wind_status"] = filtered_df["windspeed"].apply(
+        lambda x: "Tinggi" if x > threshold_wind else "Rendah"
+    )
+else:
+    threshold_wind = 0
 
 # =====================================================
 # HEADER
@@ -130,6 +133,7 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs([
 
 # 1. PERBANDINGAN TAHUN (Global View)
 with tab1:
+    st.caption("Catatan: Visualisasi ini menggunakan seluruh data (tidak terpengaruh filter).")
     st.subheader("Perbandingan Tren Penyewaan 2011 vs 2012")
     yearly_trend = df_main.groupby(["mnth_name", "yr_name"])["cnt"].mean().unstack()
     yearly_trend = yearly_trend.reindex(month_options)
@@ -179,7 +183,10 @@ with tab4:
     st.subheader("Dampak Kecepatan Angin Terhadap Penyewaan")
     if not filtered_df.empty:
         # Menggunakan rata-rata seluruh data sebagai ambang batas tetap
-        threshold_wind = df_main["windspeed"].mean()
+        if not filtered_df.empty:
+            threshold_wind = filtered_df["windspeed"].mean()
+        else:
+        threshold_wind = 0  # fallback
         filtered_df["wind_status"] = filtered_df["windspeed"].apply(lambda x: "Tinggi" if x > threshold_wind else "Rendah")
         
         wind_analysis = filtered_df.groupby("wind_status")["cnt"].mean().reindex(["Rendah", "Tinggi"])
@@ -262,7 +269,11 @@ with st.expander("Klik untuk melihat Detail Analisis & Rekomendasi Strategis"):
                 - **Konversi Pengguna:** Mengajak pengguna Casual beralih ke Registered melalui diskon membership pada hari-hari dengan cuaca mendukung.
                 - **Loyalitas:** Memberikan reward eksklusif bagi pengguna **{dominant_user}** untuk mempertahankan retensi.
                 """)
-    else:
-        st.warning("⚠️ Data tidak tersedia. Harap sesuaikan filter di sidebar.")
+    if filtered_df.empty:
+    st.warning("⚠️ Tidak ada data yang sesuai dengan filter. Silakan pilih bulan lain.")
+    
+    st.info("Tips: Pilih lebih banyak bulan atau ubah tahun untuk melihat analisis.")
+    
+    st.stop()
         
 st.caption("Copyright © Charista Septi Dwi Artamy - 2026")
